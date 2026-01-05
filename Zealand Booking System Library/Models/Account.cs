@@ -14,7 +14,7 @@ namespace Zealand_Booking_System_Library.Models
     public class Account
     {
         /// <summary>
-        /// Unique ID for the account, used so the system can reliably track the user.
+        /// Unique ID for the account, used so the system can reliably track the userr.
         /// </summary>
         public int AccountID { get; set; }
         /// <summary>
