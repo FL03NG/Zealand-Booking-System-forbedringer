@@ -1,0 +1,122 @@
+﻿@page
+@model Zealand_Booking_System.Pages.Accounts.UserListModel
+@using Zealand_Booking_System_Library.Models
+@{
+    /// <summary>
+    /// Responsibility:
+    /// - Shows a list of all users.
+    /// - Allows searching, editing, and deleting accounts.
+    ///
+    /// Why this page exists:
+    /// - To give administrators an overview of users.
+    /// - To manage user accounts in one place.
+    /// </summary>
+    ViewData["Title"] = "User list";
+}
+
+<section class="my-4 my-md-5">
+    <h1 class="zb-section-title mb-3">Userlist</h1>
+
+    <!-- Search is handled with POST and a page handler -->
+    <div class="zb-form-card mb-4">
+        <form method="post" asp-page-handler="Search" class="mb-0">
+            <label asp-for="SearchName" class="form-label">Search username</label>
+            <div class="input-group">
+                <input asp-for="SearchName" class="form-control" placeholder="Search username..." />
+                <button type="submit" class="btn zb-btn-primary">
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    @* Shows a message after actions like edit or delete *@
+    @if (!string.IsNullOrEmpty(Model.Message))
+        {
+            <div class="alert alert-info">@Model.Message</div>
+        }
+
+    @* Shown when no users match the search *@
+    @if (Model.Users == null || Model.Users.Count == 0)
+    {
+        <p>There are no users.</p>
+    }
+    else
+    {
+        <div class="zb-table-card">
+            <div class="table-responsive">
+
+                @* User list table *@
+                <table class="table table-sm align-middle zb-table">
+                    <thead>
+                        <tr>
+                            <th>AccountID</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Account user in Model.Users)
+                        {
+                            if (Model.EditUserID == user.AccountID)
+                            {
+                                @* Edit mode for one user *@
+                                <tr>
+                                    <form method="post" asp-page-handler="SaveEdit">
+                                    <td>
+                                            @user.AccountID
+                                        <input type="hidden" asp-for="EditUser.AccountID" />
+                                    </td>
+
+                                    <td>
+                                        <input asp-for="EditUser.Username" class="form-control" />
+                                    </td>
+
+                                    <td>
+                                            @* Only allow valid roles *@
+                                        <select asp-for="EditUser.Role" class="form-select">
+                                            <option value="Administrator">Administrator</option>
+                                            <option value="Teacher">Teacher</option>
+                                            <option value="Student">Student</option>
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <button type="submit" class="btn btn-success btn-sm">Save</button>
+                                        <a asp-page="./UserList" class="btn zb-btn-secondary btn-sm">Regret</a>
+                                    </td>
+                                    </form>
+                                </tr>
+                            }
+                            else
+                            {
+                                @* Normal view mode *@
+                                <tr>
+                                    <td>@user.AccountID</td>
+                                    <td>@user.Username</td>
+                                    <td>@user.Role</td>
+                                    <td>
+                                        @* Delete via POST + confirm popup *@
+                                        <form method="post" asp-page-handler="Delete" class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                            <input type="hidden" name="accountID" value="@user.AccountID" />
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+
+                                        @* Start inline edit *@
+                                        <form method="post" asp-page-handler="StartEdit" class="d-inline">
+                                            <input type="hidden" name="accountID" value="@user.AccountID" />
+                                            <button type="submit" class="btn btn-warning btn-sm">Edit</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</section>
+`

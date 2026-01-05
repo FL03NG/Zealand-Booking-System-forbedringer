@@ -1,0 +1,43 @@
+﻿@*
+    Page: Notifications
+
+    Responsibility:
+    - Shows unread notifications for the logged-in user.
+    - Lets the user mark notifications as read.
+
+    Why this page exists:
+    - To show important system messages in one place.
+    - To allow simple interaction without extra navigation.
+*@
+@page
+@model Zealand_Booking_System.Pages.NotificationsModel
+
+<h2>Your notifications</h2>
+
+@*
+    If there are no unread notifications,
+    show a simple message instead of an empty page.
+*@
+@if (Model.Notifications.Count == 0)
+{
+    <p>You have no notifications.</p>
+}
+else
+{
+    @*
+        Each notification shows:
+        - The message text
+        - A button to mark it as read
+    *@
+    foreach (var n in Model.Notifications)
+    {
+        <div class="alert alert-warning d-flex justify-content-between">
+            <span>@n.Message</span>
+
+            <form method="post" asp-page-handler="MarkRead">
+                <input type="hidden" name="notificationID" value="@n.NotificationID" />
+                <button class="btn btn-sm btn-success">OK</button>
+            </form>
+        </div>
+    }
+}

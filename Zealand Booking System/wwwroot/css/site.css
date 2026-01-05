@@ -1,0 +1,429 @@
+/* 
+    <summary>
+    Global stylesheet for the Zealand Booking System.
+
+    Responsibility:
+    - Defines the color theme, layout rules and reusable UI components.
+    - Ensures consistent styling across all Razor Pages.
+    - Implements Zealand-inspired black/yellow design for a clear identity.
+
+    Why this file exists:
+    - To centralize all design decisions instead of having inline styles everywhere.
+    - Makes the system easier to maintain and visually consistent.
+    </summary>
+*/
+
+/* ------------------------------------------- */
+/* Color variables                              */
+/* ------------------------------------------- */
+
+/* 
+    <summary>
+    Global CSS variables storing theme colors.
+    Why:
+    - Allows easy color updates in one place.
+    - Ensures visual consistency across all components.
+    </summary>
+*/
+:root {
+    --zb-bg: #000000; /* Base black background */
+    --zb-bg-alt: #111111; /* Slightly lighter black for cards */
+    --zb-yellow: #ffe97a; /* Main yellow accent */
+    --zb-yellow-soft: #fff4a3; /* Softer yellow for hover effects */
+    --zb-text: #ffe97a; /* Default text color */
+    --zb-muted: #9b9b9b; /* Subtle gray for secondary text */
+}
+
+/* ------------------------------------------- */
+/* Base page styling                            */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    General body styling.
+    Why:
+    - Ensures the entire application uses the same dark theme.
+    - Sets a modern, system-friendly font.
+    </summary>
+*/
+.zb-body {
+    background-color: var(--zb-bg) !important;
+    color: var(--zb-text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/*
+    <summary>
+    Makes Bootstrap containers transparent.
+    Why:
+    - Avoids white boxes appearing on dark background pages.
+    </summary>
+*/
+.container {
+    background-color: transparent;
+}
+
+/* ------------------------------------------- */
+/* Buttons                                      */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Primary booking button styling.
+    Why:
+    - Creates a clear and attractive call-to-action for room booking.
+    </summary>
+*/
+.btn-book-room {
+    background-color: var(--zb-yellow);
+    color: #000000;
+    border: 1px solid var(--zb-yellow);
+    font-weight: 600;
+}
+
+    .btn-book-room:hover {
+        background-color: #ffef96; /* Brighter yellow on hover */
+        border-color: #ffef96;
+        color: #000000;
+    }
+
+/* ------------------------------------------- */
+/* Status Indicators                            */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Small colored box used to show booking status.
+    Why:
+    - Provides a simple and visual indicator instead of text-only status labels.
+    </summary>
+*/
+.status-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* ------------------------------------------- */
+/* Links                                        */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Custom link styling to match theme.
+    Why:
+    - Ensures all links follow the yellow theme and remain readable on dark backgrounds.
+    </summary>
+*/
+a {
+    color: var(--zb-yellow);
+}
+
+    a:hover {
+        color: var(--zb-yellow-soft);
+    }
+
+/* ------------------------------------------- */
+/* Navbar                                       */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Navigation bar styling.
+    Why:
+    - Ensures the navbar follows the same yellow/black theme as the rest of the site.
+    </summary>
+*/
+.zb-navbar {
+    background-color: var(--zb-yellow);
+    border-bottom: 1px solid var(--zb-yellow);
+}
+
+.navbar-brand,
+.navbar-brand:focus,
+.navbar-brand:hover {
+    color: #000000;
+}
+
+.navbar-nav .nav-link {
+    color: #000000;
+    font-weight: 500;
+}
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        text-decoration: underline;
+    }
+
+/* ------------------------------------------- */
+/* Hero Section                                 */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Main hero title styling.
+    Why:
+    - The title should be strong, readable, and immediately communicate the purpose.
+    </summary>
+*/
+.zb-hero-title {
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    font-weight: 700;
+    color: var(--zb-yellow);
+}
+
+.zb-hero-text {
+    color: var(--zb-muted);
+}
+
+/*
+    <summary>
+    Badge above hero title.
+    Why:
+    - Provides a small label for context or user group (e.g., “For students and teachers”).
+    </summary>
+*/
+.zb-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--zb-yellow-soft);
+    background-color: transparent;
+    border-radius: 999px;
+    border: 1px solid var(--zb-yellow-soft);
+    padding: 0.2rem 0.9rem;
+}
+
+/* ------------------------------------------- */
+/* Cards                                        */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Shared card styling (hero, forms, tables, info cards).
+    Why:
+    - Gives all cards a consistent rounded, modern look.
+    - Supports the dark UI theme with subtle borders.
+    </summary>
+*/
+.zb-hero-card,
+.zb-form-card,
+.zb-table-card,
+.zb-info-card {
+    background-color: var(--zb-bg-alt);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 233, 122, 0.2);
+    padding: 1.5rem;
+}
+
+/* ------------------------------------------- */
+/* Step Numbers                                 */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Small yellow circles for step numbers.
+    Why:
+    - Helps users visually follow process steps on the Index page.
+    </summary>
+*/
+.zb-step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background-color: var(--zb-yellow);
+    color: #000000;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.2rem;
+}
+
+/* ------------------------------------------- */
+/* Buttons (Primary / Secondary)                */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Primary button (yellow background).
+    Why:
+    - Used for main actions such as creating a booking.
+    </summary>
+*/
+.zb-btn-primary {
+    background-color: var(--zb-yellow);
+    border-color: var(--zb-yellow);
+    color: #000000;
+    font-weight: 600;
+}
+
+    .zb-btn-primary:hover {
+        background-color: #ffef96;
+        border-color: #ffef96;
+        color: #000000;
+    }
+
+/*
+    <summary>
+    Secondary button (transparent background).
+    Why:
+    - Used for supporting actions while keeping visual hierarchy clear.
+    </summary>
+*/
+.zb-btn-secondary {
+    background-color: transparent;
+    border-color: var(--zb-yellow);
+    color: var(--zb-yellow);
+    font-weight: 500;
+}
+
+    .zb-btn-secondary:hover {
+        background-color: var(--zb-yellow);
+        color: #000000;
+    }
+
+/* ------------------------------------------- */
+/* Footer                                       */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Footer styling.
+    Why:
+    - Keeps design consistent with the dark theme at the bottom of the page.
+    </summary>
+*/
+.zb-footer {
+    background-color: #000000;
+    border-top: 1px solid rgba(255, 233, 122, 0.3);
+    color: var(--zb-muted);
+}
+
+    .zb-footer a {
+        color: var(--zb-yellow-soft);
+    }
+
+/* ------------------------------------------- */
+/* Table Styling (Booking List + User List)     */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Table header styling.
+    Why:
+    - Ensures headers remain readable on dark backgrounds.
+    </summary>
+*/
+.zb-table thead th {
+    color: #ffe97a !important;
+    border-color: rgba(255, 233, 122, .2);
+}
+
+/*
+    <summary>
+    Table row styling.
+    Why:
+    - Makes booking and user lists clear and consistent.
+    </summary>
+*/
+.zb-table tbody td {
+    color: #ffe97a !important;
+    border-top: 1px solid rgba(255, 233, 122, .12);
+}
+
+/*
+    <summary>
+    Stripe effect for rows.
+    Why:
+    - Improves readability by separating table rows visually.
+    </summary>
+*/
+.table-striped.zb-table tbody tr:nth-of-type(odd) {
+    background-color: #111111;
+}
+
+.table-striped.zb-table tbody tr:nth-of-type(even) {
+    background-color: #090909;
+}
+
+/*
+    <summary>
+    Row hover effect.
+    Why:
+    - Makes it easier for users to track a row horizontally.
+    </summary>
+*/
+.zb-table tbody tr:hover {
+    background-color: #181818;
+}
+
+/* ------------------------------------------- */
+/* User Overview Table Fix                      */
+/* ------------------------------------------- */
+
+/*
+    <summary>
+    Ensures all tables (even Bootstrap defaults) show yellow text.
+    Why:
+    - Some Bootstrap classes override text color, so these rules enforce consistency.
+    </summary>
+*/
+table.zb-table thead th,
+.table thead th,
+.table-bordered thead th {
+    color: #ffe97a !important;
+    border-color: rgba(255, 233, 122, 0.3) !important;
+}
+
+table.zb-table tbody td,
+.table tbody td,
+.table-bordered tbody td {
+    color: #ffe97a !important;
+}
+
+.table-bordered td, .table-bordered th {
+    border-color: rgba(255, 233, 122, 0.25) !important;
+}
+
+table.zb-table tbody tr:hover,
+.table tbody tr:hover {
+    background-color: rgba(255, 233, 122, 0.08) !important;
+}
+
+/*
+    <summary>
+    Fixes Bootstrap striped rows so they do not become gray on dark backgrounds.
+    </summary>
+*/
+.table-striped tbody tr:nth-of-type(odd),
+.table-striped tbody tr:nth-of-type(even) {
+    color: #ffe97a !important;
+}
+
+/*
+    for notification
+*/
+.zb-alert {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    margin: 1rem 0;
+    background-color: #d6f8ff; 
+    color: #013746; 
+    border: 1px solid rgba(1, 55, 70, 0.35);
+    font-size: 1.05rem;
+    font-weight: 500;
+}
+/*
+    for pictures on front page
+*/
+.zb-info-card img {
+    width: 100%;
+    height: 160px; 
+    object-fit: cover; 
+    border-radius: 8px; 
+    margin-bottom: 12px;
+}

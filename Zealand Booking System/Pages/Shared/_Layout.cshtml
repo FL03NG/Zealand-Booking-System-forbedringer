@@ -1,0 +1,152 @@
+﻿@using Zealand_Booking_System_Library.Models
+@inject Zealand_Booking_System_Library.Service.NotificationService NotificationService
+@*
+    This layout serves as the shared UI shell for the entire application.
+    It centralizes navigation, authentication state, and notifications
+    so global UI behavior can be maintained in one place.
+*@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    @* Required for proper rendering and interaction across different screen sizes *@
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Zealand_Booking_System</title>
+    @* Branding and styling are defined here to ensure consistency *@
+    <link rel="icon" type="image/png" href="~/images/Zealand.png" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="zb-body">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark zb-navbar border-bottom mb-3">
+            <div class="container">
+                @* The logo also functions as a quick way back to the home page *@
+                <a class="navbar-brand" asp-area="" asp-page="/Index">
+                    <img src="~/images/zealand_logo_black_rgb_1600px_72dpi.png.webp" alt="Zealand Logo" height="40" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                @{
+                    /*
+                    User-related data is read from the session because the layout
+                    must reflect authentication state regardless of the current page.
+                    */
+                    var role = Context.Session.GetString("Role");
+                    var username = Context.Session.GetString("Username");
+                    var accountId = Context.Session.GetInt32("AccountID");
+                    int unreadNotifications = 0;
+                    /*
+                    The notification count is only retrieved when a user is logged in
+                    to avoid unnecessary service calls and potential null issues.
+                    */
+                    if (accountId.HasValue)
+                    {
+                        unreadNotifications = NotificationService.GetUnread(accountId.Value).Count;
+                    }
+                }
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Index">Home</a>
+                        </li>
+                        @*
+                        Menu items are shown conditionally to prevent access to
+                        features that require authentication.
+                        *@
+                        @if (accountId != null)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/FindRoom">Create Booking</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/BookingList">Bookings</a>
+                            </li>
+                            @*
+                            Administrator-specific navigation is restricted by role
+                            to both improve UX and add an additional safety layer.
+                            *@
+                            @if (role == "Administrator")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-page="/Accounts/UserList">Users</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-page="/Room">Rooms</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @*
+                        Login and registration options are only visible
+                        when no user session is active.
+                        *@
+                        @if (accountId == null)
+                        {
+                            <li class="nav-item"><a class="nav-link text-dark" asp-page="/Accounts/Login">Login</a></li>
+                            <li class="nav-item"><a class="nav-link text-dark" asp-page="/Accounts/Register">Register</a></li>
+                        }
+                        else
+                        {
+                            @*
+                            Showing the logged-in username helps avoid confusion,
+                            especially on shared or public computers.
+                            *@
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <span class="text-dark">Logged in as: <strong class="ms-1">@username</strong></span>
+                            </li>
+                            @*
+                            Logout is performed via POST to follow recommended
+                            security practices and avoid accidental logouts.
+                            *@
+                            <li class="nav-item d-flex align-items-center">
+                                <form method="post" action="/logout" class="d-inline m-0 p-0">
+                                    <button type="submit" class="btn btn-link nav-link text-dark m-0 p-0">Logout</button>
+                                </form>
+                            </li>
+                            @*
+                            Notifications are highlighted to give immediate feedback
+                            without requiring the user to check manually.
+                            *@
+                            <li class="nav-item">
+                                <a class="nav-link text-dark position-relative" asp-page="/Notifications">
+                                    Notifications
+                                    @if (unreadNotifications > 0)
+                                    {
+                                        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                                            @unreadNotifications
+                                        </span>
+                                    }
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @* Page-specific content is rendered here *@
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - Zealand_Booking_System - <a asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+    @* Scripts are placed at the bottom to improve page load performance *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

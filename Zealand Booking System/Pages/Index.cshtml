@@ -1,0 +1,212 @@
+﻿@*
+    Front page of the booking system.
+    Content changes depending on login status.
+*@
+@page
+@model Zealand_Booking_System.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home";
+
+    // Check if the user is logged in
+    int? loggedId = HttpContext.Session.GetInt32("AccountID");
+}
+
+@*
+    Main hero section.
+    Shows different actions for guests and logged-in users.
+*@
+<section class="zb-hero my-4 my-md-5">
+    <div class="row align-items-start gy-4">
+
+        @*
+            Left side with welcome text and buttons.
+        *@
+        <div class="col-lg-6">
+
+            @* Show intro text for guests *@
+            @if (loggedId == null)
+            {
+                <span class="zb-badge mb-2">For students & teachers</span>
+
+                <h1 class="zb-hero-title mb-3">
+                    Book a study room at Zealand – fast and easy
+                </h1>
+
+                <p class="zb-hero-text mb-4 text-light">
+                    Find and book available rooms for study or teaching.
+                </p>
+            }
+            else
+            {
+                @* Strong call to action for logged-in users *@
+                <span class="zb-badge mb-3"
+                      style="background-color:#f7d774;
+                             color:black;
+                             font-weight:bold;
+                             font-size:1.3rem;
+                             padding:10px 22px;
+                             border-radius:25px;">
+                    CREATE A BOOKING NOW!
+                </span>
+            }
+
+            @* Buttons based on login state *@
+            <div class="d-flex flex-wrap gap-3">
+                @if (loggedId == null)
+                {
+                    <a asp-page="/Accounts/Login" class="btn zb-btn-primary px-4 py-2">
+                        Log in
+                    </a>
+                    <a asp-page="/Accounts/Register" class="btn zb-btn-secondary px-4 py-2">
+                        Create account
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/FindRoom" class="btn zb-btn-primary px-5 py-3" style="font-size:1.2rem;">
+                        Create booking
+                    </a>
+
+                    <a asp-page="/BookingList" class="btn zb-btn-secondary px-5 py-3" style="font-size:1.2rem;">
+                        See all bookings
+                    </a>
+                }
+            </div>
+
+            @* Small status message *@
+            <p class="small text-light mt-3 mb-0">
+                @if (loggedId == null)
+                {
+                    <span>You must be logged in to book rooms.</span>
+                }
+                else
+                {
+                    <span>You are logged in.</span>
+                }
+            </p>
+
+        </div>
+
+        @*
+            Right side showing steps.
+            Steps depend on login state.
+        *@
+        <div class="col-lg-6">
+            <div class="zb-hero-card shadow-sm">
+                <h5 class="mb-3 text-light">Next steps</h5>
+
+                @if (loggedId == null)
+                {
+                    <ul class="list-unstyled mb-3 small text-light">
+                        <li class="d-flex mb-2">
+                            <span class="zb-step-number me-2">1</span>
+                            <div>
+                                <strong>Create account</strong><br />
+                                <span>Register with your Zealand email.</span>
+                            </div>
+                        </li>
+                        <li class="d-flex mb-2">
+                            <span class="zb-step-number me-2">2</span>
+                            <div>
+                                <strong>Log in</strong><br />
+                                <span>Access the system.</span>
+                            </div>
+                        </li>
+                        <li class="d-flex mb-2">
+                            <span class="zb-step-number me-2">3</span>
+                            <div>
+                                <strong>Create booking</strong><br />
+                                <span>Select date and time.</span>
+                            </div>
+                        </li>
+                        <li class="d-flex">
+                            <span class="zb-step-number me-2">4</span>
+                            <div>
+                                <strong>Confirm</strong><br />
+                                <span>Your booking is saved.</span>
+                            </div>
+                        </li>
+                    </ul>
+                }
+                else
+                {
+                    <ul class="list-unstyled mb-3 small text-light">
+                        <li class="d-flex mb-2">
+                            <span class="zb-step-number me-2">1</span>
+                            <div>
+                                <strong>Create booking</strong><br />
+                                <span>Choose date and room.</span>
+                            </div>
+                        </li>
+                        <li class="d-flex mb-2">
+                            <span class="zb-step-number me-2">2</span>
+                            <div>
+                                <strong>Book room</strong><br />
+                                <span>Select time slot.</span>
+                            </div>
+                        </li>
+                        <li class="d-flex">
+                            <span class="zb-step-number me-2">3</span>
+                            <div>
+                                <strong>Manage bookings</strong><br />
+                                <span>Edit or cancel if needed.</span>
+                            </div>
+                        </li>
+                    </ul>
+                }
+
+                @* Project info *@
+                <div class="zb-hero-meta small text-light">
+                    <div>Datamatiker project</div>
+                    <div>Zealand · Roskilde</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@* Extra info shown only for guests *@
+@if (loggedId == null)
+{
+    <section class="my-5">
+        <h2 class="zb-section-title mb-3">Why use this system?</h2>
+        <p class="mb-4 text-light">
+            Quickly find and book available rooms at Zealand.
+        </p>
+
+        <div class="row gy-4 text-light">
+
+            <div class="col-md-4">
+                <div class="zb-info-card h-100">
+                    <img src="~/images/classroom2.jpg" alt="Overview" />
+                    <h5 class="mb-2">Overview</h5>
+                    <p class="small mb-0">
+                        See all available rooms.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="zb-info-card h-100">
+                    <img src="~/images/classroom1.jpg" alt="No double bookings" />
+                    <h5 class="mb-2">No double bookings</h5>
+                    <p class="small mb-0">
+                        Conflicts are prevented automatically.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="zb-info-card h-100">
+                    <img src="~/images/students.jpg" alt="Students" />
+                    <h5 class="mb-2">Student friendly</h5>
+                    <p class="small mb-0">
+                        Simple and familiar design.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+}

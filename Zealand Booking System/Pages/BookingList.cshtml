@@ -1,0 +1,178 @@
+﻿@*
+    <summary>
+    Page: BookingList.cshtml
+
+    Responsibility:
+    - Shows all room bookings in a searchable table.
+    - Allows admins/teachers to edit or delete any booking.
+    - Allows users to delete their own bookings.
+
+    Why this page exists:
+    - Provides a clear overview of bookings for management and students.
+    - Contains both view mode and edit mode for flexible administration.
+    - Implements role-based access control (Administrator/Teacher/Student).
+    </summary>
+*@
+
+@page
+@using Zealand_Booking_System_Library.Models
+@model Zealand_Booking_System.Pages.Shared.BookingListModel
+@{
+    ViewData["Title"] = "Room bookings";
+
+    // Session data used for access control
+    string role = HttpContext.Session.GetString("Role");
+    int? accountId = HttpContext.Session.GetInt32("AccountID");
+    string[] allowedRoles = new[] { "Administrator", "Teacher" };
+}
+
+<section class="my-4 my-md-5">
+    <h2 class="zb-section-title mb-3">Room bookings</h2>
+
+    @* Shows status messages (e.g., after delete/edit) *@
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-info">@Model.Message</div>
+    }
+
+    <!-- SEARCH FORM -->
+    <div class="zb-form-card mb-4">
+        <form method="post" asp-page-handler="Search" class="mb-0">
+            <label for="SearchName" class="form-label">Search after booking (Username)</label>
+            <input asp-for="SearchName" id="SearchName" class="form-control" placeholder="Write a 'Name'" />
+            <button type="submit" class="btn zb-btn-secondary mt-2">Search</button>
+        </form>
+    </div>
+
+    <!-- BOOKINGS TABLE -->
+    <div class="zb-table-card">
+        <div class="table-responsive">
+            <table class="table table-sm align-middle zb-table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Account</th>
+                        <th>Room</th>
+                        <th>Smartboard</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Roll</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @* When bookings exist, display them *@
+                    @if (Model.Bookings != null && Model.Bookings.Count > 0)
+                    {
+                        foreach (Booking booking in Model.Bookings)
+                        {
+                            @* EDIT MODE — only for one booking at a time *@
+                            if (Model.EditBookingID == booking.BookingID)
+                            {
+                                <tr>
+                                    <td>@booking.BookingID</td>
+                                    <td>@(booking.Account != null ? booking.Account.Username : $"ID: {booking.AccountID}")</td>
+                                    <td>@(booking.Room != null ? booking.Room.RoomName : $"ID: {booking.RoomID}")</td>
+
+                                    <td colspan="3">
+                                        <form method="post" asp-page-handler="SaveEdit" class="d-inline">
+                                            <input asp-for="EditBooking.BookingID" type="hidden" />
+                                            <input asp-for="EditBooking.AccountID" type="hidden" />
+                                            <input asp-for="EditBooking.RoomID" type="hidden" />
+
+                                            <!-- EDIT DATE -->
+                                            <div class="mb-2">
+                                                <label for="EditBooking_BookingDate" class="form-label">Date</label>
+                                                <input asp-for="EditBooking.BookingDate"
+                                                       id="EditBooking_BookingDate"
+                                                       type="date"
+                                                       class="form-control" />
+                                            </div>
+
+                                            <!-- EDIT TIMESLOT -->
+                                            <div class="mb-2">
+                                                <label for="EditBooking_TimeSlot" class="form-label">Time</label>
+                                                <select asp-for="EditBooking.TimeSlot"
+                                                        id="EditBooking_TimeSlot"
+                                                        class="form-select">
+                                                    <option value="Slot08_10">08:00 - 10:00</option>
+                                                    <option value="Slot10_12">10:00 - 12:00</option>
+                                                    <option value="Slot12_14">12:00 - 14:00</option>
+                                                    <option value="Slot14_16">14:00 - 16:00</option>
+                                                </select>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-success btn-sm">Save</button>
+                                            <a asp-page="./BookingList" class="btn zb-btn-secondary btn-sm">Regret</a>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @* VIEW MODE — default display *@
+                                <tr>
+                                    <td>@booking.BookingID</td>
+
+                                    <!-- ACCOUNT NAME -->
+                                    <td>@(booking.Account != null ? booking.Account.Username : $"ID: {booking.AccountID}")</td>
+
+                                    <!-- ROOM NAME -->
+                                    <td>@(booking.Room != null ? booking.Room.RoomName : $"ID: {booking.RoomID}")</td>
+                                    <!-- SMARTBOARD -->
+                                    <td>@(booking.Room != null && booking.Room.HasSmartBoard? "Yes" : "No")</td>
+                                    <!-- DATE -->
+                                    <td>@booking.BookingDate.ToString("dd-MM-yyyy")</td>
+
+                                    <!-- TIMESLOT -->
+                                    <td>@Html.DisplayFor(_ => booking.TimeSlot)</td>
+
+                                    <!-- ROLE — derived from subclass type -->
+                                    <td>
+                                        @(booking.Account != null
+                                            ? booking.Account.GetType().Name
+                                            : "Ukendt rolle")
+                                    </td>
+
+                                    <!-- ACTIONS -->
+                                    <td>
+                                        @* Only admins/teachers OR booking owners may delete *@
+                                        @if (allowedRoles.Contains(role) || booking.AccountID == accountId)
+                                        {
+                                            <!-- DELETE -->
+                                            <form method="post"
+                                                  asp-page-handler="Delete"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Are you sure you want to delete this booking?');">
+                                                <input type="hidden" name="bookingID" value="@booking.BookingID" />
+                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            </form>
+
+                                            <!-- EDIT (admins/teachers only) -->
+                                            @if (allowedRoles.Contains(role))
+                                            {
+                                                <form method="post" asp-page-handler="StartEdit" class="d-inline">
+                                                    <input type="hidden" name="bookingID" value="@booking.BookingID" />
+                                                    <button type="submit" class="btn btn-warning btn-sm">Edit</button>
+                                                </form>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <!-- NO BOOKINGS FOUND -->
+                        <tr>
+                            <td colspan="7" class="text-center">No bookings found</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

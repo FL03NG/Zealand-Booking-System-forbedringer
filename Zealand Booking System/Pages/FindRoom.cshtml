@@ -1,0 +1,158 @@
+﻿@page
+@model Zealand_Booking_System.Pages.FindRoomsModel
+@using Zealand_Booking_System_Library.Models
+@{
+    @*
+    Responsibility:
+    - Shows available rooms based on selected filters.
+    - Lets the user create a booking.
+
+    Why this page exists:
+    - To make it easy to find and book free rooms.
+    - To give a clear overview of room availability.
+    *@
+    ViewData["Title"] = "Find available rooms";
+}
+<h1>Find available rooms</h1>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="zb-alert">
+        @Model.Message
+    </div>
+}
+
+@*
+    Temporary feedback messages are shown here to give users
+    immediate confirmation after actions like bookings or updates.
+*@
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">@TempData["Message"]</div>
+}
+@*
+    The filter form allows users to narrow down room availability
+    without navigating away from the page, keeping the workflow fast
+    and focused.
+*@
+<form method="post" class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-3">
+            <label asp-for="SelectedDate" class="form-label">Date</label>
+            <input asp-for="SelectedDate" type="date" class="form-control" />
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="SelectedTimeSlot" class="form-label">Timeslot</label>
+            @*
+                Enum-based dropdown ensures valid, predefined values
+                and keeps UI and domain logic aligned.
+            *@
+            <select asp-for="SelectedTimeSlot"
+                    class="form-select"
+                    asp-items="Html.GetEnumSelectList<TimeSlot>()">
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="SelectedRoomType" class="form-label">Roomtype</label>
+            @*
+                Room type filtering is optional to allow broad searches
+                when users are unsure about requirements.
+            *@
+            <select asp-for="SelectedRoomType" class="form-select">
+                <option value="">All types</option>
+                @foreach (RoomType type in Enum.GetValues(typeof(RoomType)))
+                {
+                    bool selected = Model.SelectedRoomType.HasValue && Model.SelectedRoomType.Value == type;
+                    <option value="@type" selected="@(selected)">
+                        @type
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="SelectedSmartBoard" class="form-label">Smartboard</label>
+            <select asp-for="SelectedSmartBoard" class="form-select">
+                <option value="">All</option>
+                <option value="true">With smartboard</option>
+                <option value="false">Without smartboard</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            @*
+                Submitting the form refreshes the list based on
+                selected criteria instead of loading a new page.
+            *@
+            <button type="submit" class="btn btn-primary w-100">Opdate list</button>
+        </div>
+    </div>
+</form>
+@*
+    The table provides a compact overview of room availability,
+    allowing users to compare options and act immediately.
+*@
+<table class="table table-bordered align-middle">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Room</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Smartboard</th>
+            <th>Bookings</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Rooms != null)
+        {
+            foreach (RoomAvailability avail in Model.Rooms)
+            {
+                @*
+                    Visual status indicators reduce cognitive load
+                    by communicating availability at a glance.
+                *@
+                string boxColor = "bg-danger";
+                if (avail.StatusColor == "green")
+                {
+                    boxColor = "bg-success";
+                }
+                else if (avail.StatusColor == "yellow")
+                {
+                    boxColor = "bg-warning";
+                }
+
+                <tr>
+                    <!-- Farvekasse -->
+                    <td>
+                        <div class="status-box @boxColor"></div>
+                    </td>
+                    <td>@avail.Room.RoomName</td>
+                    <td>@avail.Room.RoomType</td>
+                    <td>@avail.Room.RoomLocation</td>
+                    <td>@(avail.Room.HasSmartBoard ? "Yes" : "No")</td>
+                    <td>@avail.CurrentBookings / @avail.MaxBookings</td>
+                    <td>
+                        @*
+                            Booking is handled via POST to preserve state
+                            and ensure the correct filter context is reused.
+                        *@
+                        <form method="post"
+                              onsubmit="return confirm('Do you want to book this room on the chosen date?');">
+                            <input type="hidden" name="RoomID" value="@avail.Room.RoomID" />
+                            <input type="hidden" name="SelectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="SelectedTimeSlot" value="@Model.SelectedTimeSlot" />
+                            <input type="hidden" name="SelectedRoomType" value="@Model.SelectedRoomType" />
+
+                            <button type="submit"
+                                    asp-page-handler="Book"
+                                    class="btn btn-sm btn-book-room">
+                                Book room
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

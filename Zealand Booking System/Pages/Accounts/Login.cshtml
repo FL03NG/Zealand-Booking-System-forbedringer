@@ -1,0 +1,51 @@
+﻿@page
+@model Zealand_Booking_System.Pages.Accounts.LoginModel
+@{
+ /*
+     Responsibility:
+      - Collects username and password from the user.
+      - Sends login data to the PageModel.
+
+      Why this page exists:
+      - To allow users to log in to the system.
+      - To keep login input separate from login logic.
+*/
+    Layout = "_Layout";
+    Layout = "_Layout";
+}
+
+<h2>Login</h2>
+
+@*
+    The form sends the login data to the PageModel.
+    The actual login logic is handled elsewhere.
+*@
+<form method="post">
+
+    @*
+        Username input.
+        Used to find the user's account.
+    *@
+    <div>
+        <label>Username</label>
+        <input asp-for="Username" />
+    </div>
+
+    @*
+        Password input.
+        The text is hidden while typing.
+    *@
+    <div>
+        <label>Password</label>
+        <input asp-for="Password" type="password" />
+    </div>
+
+    <button type="submit">Login</button>
+
+    @*
+        Shows an error message after login attempt.
+        No details are shown about the account.
+    *@
+    <p style="color:red">@Model.ErrorMessage</p>
+
+</form>

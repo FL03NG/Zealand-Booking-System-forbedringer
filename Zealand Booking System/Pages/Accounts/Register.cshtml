@@ -1,0 +1,53 @@
+﻿@page
+@model Zealand_Booking_System.Pages.Accounts.RegisterModel
+@{
+    @*
+    Page for creating new user accounts.
+    Used to register users with a selected role.
+    *@
+    Layout = "_Layout";
+}
+
+<h2>Opret ny bruger</h2>
+@*
+    The form posts directly to the PageModel to ensure that
+    validation, hashing, and persistence are handled server-side.
+*@
+<form method="post">
+    @*
+        Username is collected as plain input and validated in the backend
+        to avoid duplications or invalid formats.
+    *@
+    <div>
+        <label>Username</label>
+        <input asp-for="Username" />
+    </div>
+    @*
+        The password is never processed or stored in clear text.
+        Hashing is handled in the service layer after submission.
+    *@
+    <div>
+        <label>Password</label>
+        <input asp-for="Password" type="password" />
+    </div>
+    @*
+        Role selection is intentionally limited to prevent
+        unauthorized creation of administrative accounts.
+    *@
+    <div>
+        <label>Role</label>
+        <select asp-for="Role">
+            @* Administrator role creation is disabled here by design *@
+           @*  <option value="Administrator">Administrator</option> *@
+            <option value="Teacher">Teacher</option>
+            <option value="Student">Student</option>
+        </select>
+    </div>
+
+    <button type="submit">Create User</button>
+    @*
+    Shows an error or success message after submit.
+    *@
+    <p style="color:red">@Model.ErrorMessage</p>
+    <p style="color:green">@Model.SuccessMessage</p>
+</form>
