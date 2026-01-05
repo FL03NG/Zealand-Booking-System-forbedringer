@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Zealand_Booking_System_Library.Models
 {
     /// <summary>
-    /// Represents a message sent to a user, typically used to inform them
+    /// Represents a message sent to a user, typically used to inform themm
     /// about changes to their bookings (such as cancellations or system updates).
     ///
     /// Responsibility:
