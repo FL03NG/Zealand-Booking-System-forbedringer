@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
 using Zealand_Booking_System_Library.Models;
 using Zealand_Booking_System_Library.Repository;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Zealand_Booking_System_Library.Service
 {
@@ -194,15 +196,16 @@ namespace Zealand_Booking_System_Library.Service
 
             int maxBookingsForRoom =
                 room.RoomType == RoomType.ClassRoom ? 2 : 1;
+            //tæller hvor mange andre bookinger der allerede findes i samme rum, 
+            //på samme dato og i samme tidsrum som den booking, du er ved at opdatere.
+            int sameRoomSameSlotCount = _bookingRepo.GetAll() //henter alle bookinger,
+                .Where(b => b.BookingID != booking.BookingID) //bortset fra det du er ved at redigere.
+                .Count(b => //tæller kun hvis,
+                    b.RoomID == booking.RoomID && //den er i samme rum,
+                    b.BookingDate.Date == booking.BookingDate.Date && //på samme dato,
+                    b.TimeSlot == booking.TimeSlot); //og i samme tidsrum
 
-            int sameRoomSameSlotCount = _bookingRepo.GetAll()
-                .Where(b => b.BookingID != booking.BookingID)
-                .Count(b =>
-                    b.RoomID == booking.RoomID &&
-                    b.BookingDate.Date == booking.BookingDate.Date &&
-                    b.TimeSlot == booking.TimeSlot);
-
-            if (sameRoomSameSlotCount >= maxBookingsForRoom)
+            if (sameRoomSameSlotCount >= maxBookingsForRoom) //tjekker om rummet allerede er booket max
                 throw new Exception(
                     room.RoomType == RoomType.ClassRoom
                         ? "This classroom is already booked in this timezone."
