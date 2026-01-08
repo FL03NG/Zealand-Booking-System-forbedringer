@@ -23,11 +23,8 @@ namespace Zealand_Booking_System.Pages.Shared
     /// </summary>
   
     public class BookingListModel : PageModel
-    {/// <summary>
-     /// Database connection string used by the repositories.
-     /// </summary>
-        private readonly string _connectionString =
-            "Server =(localdb)\\MSSQLLocalDB;Database=RoomBooking;Trusted_Connection=True;TrustServerCertificate=True";
+    {
+        
 
         /// <summary>
         /// Bookings shown on the page.
@@ -81,7 +78,8 @@ namespace Zealand_Booking_System.Pages.Shared
         /// Loads users and returns the correct type (Student/Teacher/Admin).
         /// </summary>
         private readonly UserService _userService;
-
+        private readonly NotificationService _notificationService;
+        private readonly RoomService _roomService;
         /// <summary>
         /// Message shown after actions (create/edit/delete).
         /// </summary>
@@ -90,14 +88,12 @@ namespace Zealand_Booking_System.Pages.Shared
         /// <summary>
         /// Creates repositories and services for this page.
         /// </summary>
-        public BookingListModel()
+        public BookingListModel(BookingService bookingService, UserService userService, NotificationService notificationService, RoomService roomService)
         {
-            BookingCollectionRepo bookingRepo = new BookingCollectionRepo(_connectionString);
-            RoomCollectionRepo roomRepo = new RoomCollectionRepo(_connectionString);
-            UserCollectionRepo userRepo = new UserCollectionRepo(_connectionString);
-
-            _bookingService = new BookingService(bookingRepo, roomRepo);
-            _userService = new UserService(userRepo);
+            _bookingService = bookingService;
+            _userService = userService;
+            _notificationService = notificationService;
+            _roomService = roomService;
         }
 
         /// <summary>
@@ -169,14 +165,12 @@ namespace Zealand_Booking_System.Pages.Shared
 
                 _bookingService.Delete(bookingID, role);
 
-                // Create notification after delete
-                NotificationCollectionRepo noteRepo = new NotificationCollectionRepo(_connectionString);
-                NotificationService noteService = new NotificationService(noteRepo);
 
-                noteService.Create(
-                    booking.AccountID,
-                    $"Your booking at {booking.BookingDate:dd-MM-yyyy} has been deleted."
-                );
+
+            _notificationService.Create(
+                booking.AccountID,
+                $"Your booking at {booking.BookingDate:dd-MM-yyyy} has been deleted."
+            );
 
                 Message = "Booking deleted!";
             }
@@ -232,13 +226,13 @@ namespace Zealand_Booking_System.Pages.Shared
         {
             Bookings = _bookingService.GetAll();
 
-            RoomCollectionRepo roomRepo = new RoomCollectionRepo(_connectionString);
-            Rooms = roomRepo.GetAllRooms();
+            
+            Rooms = _roomService.GetAllRooms();
 
             foreach (Booking booking in Bookings)
             {
                 booking.Account = _userService.GetById(booking.AccountID);
-                booking.Room = roomRepo.GetRoomById(booking.RoomID);
+                booking.Room = _roomService.GetRoomById(booking.RoomID);
             }
         }
     }

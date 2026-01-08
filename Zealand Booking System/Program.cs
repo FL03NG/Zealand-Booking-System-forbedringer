@@ -35,6 +35,9 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<INotificationRepository>(provider => new NotificationCollectionRepo(connectionString));
 builder.Services.AddScoped<NotificationService>();
 
+builder.Services.AddScoped<IBookingRepository>(provider => new BookingCollectionRepo(connectionString));
+builder.Services.AddScoped<BookingService>();
+
 // Data Protection is configured to persist keys outside the application directory
 // to ensure encrypted data remains readable across restarts and deployments
 builder.Services.AddDataProtection()

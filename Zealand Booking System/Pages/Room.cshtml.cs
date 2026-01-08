@@ -22,11 +22,7 @@ namespace Zealand_Booking_System.Pages
     /// </summary>
     public class RoomModel : PageModel
     {
-        /// <summary>
-        /// Database connection string used by the repository.
-        /// </summary>
-        private readonly string _connectionString =
-            "Server=(localdb)\\MSSQLLocalDB;Database=RoomBooking;Trusted_Connection=True;TrustServerCertificate=True;";
+        
 
         /// <summary>
         /// The room id currently being edited.
@@ -78,10 +74,9 @@ namespace Zealand_Booking_System.Pages
         /// <summary>
         /// Creates the PageModel and sets up the service.
         /// </summary>
-        public RoomModel()
+        public RoomModel(RoomService roomService)
         {
-            RoomCollectionRepo repo = new RoomCollectionRepo(_connectionString);
-            _roomService = new RoomService(repo);
+            _roomService = roomService;
         }
 
         /// <summary>

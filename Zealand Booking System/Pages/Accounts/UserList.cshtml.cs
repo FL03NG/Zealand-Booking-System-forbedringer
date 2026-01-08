@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Collections.Generic;
 using Zealand_Booking_System_Library.Models;
 using Zealand_Booking_System_Library.Repository;
+using Zealand_Booking_System_Library.Service;
 
 namespace Zealand_Booking_System.Pages.Accounts
 {
@@ -17,12 +18,12 @@ namespace Zealand_Booking_System.Pages.Accounts
     /// </summary>
     public class UserListModel : PageModel
     {
-        /// <summary>
-        /// Database connection string used by the repository.
-        /// </summary>
-        private readonly string _connectionString =
-            "Server =(localdb)\\MSSQLLocalDB;Database=RoomBooking;Trusted_Connection=True;TrustServerCertificate=True";
-
+       
+        private readonly UserService _userService;
+        public UserListModel(UserService userService)
+        {
+            _userService = userService;
+        }
         /// <summary>
         /// Users shown in the list.
         /// </summary>
@@ -93,8 +94,8 @@ namespace Zealand_Booking_System.Pages.Accounts
         {
             EditUserID = accountID;
 
-            UserCollectionRepo repo = new UserCollectionRepo(_connectionString);
-            EditUser = repo.GetById(accountID);
+            
+            EditUser = _userService.GetById(accountID);
 
             LoadData();
             return Page();
@@ -105,8 +106,8 @@ namespace Zealand_Booking_System.Pages.Accounts
         /// </summary>
         public IActionResult OnPostSaveEdit()
         {
-            UserCollectionRepo repo = new UserCollectionRepo(_connectionString);
-            repo.UpdateUser(EditUser);
+            
+            _userService.UpdateUser(EditUser);
 
             Message = "User saved";
             LoadData();
@@ -118,8 +119,8 @@ namespace Zealand_Booking_System.Pages.Accounts
         /// </summary>
         public IActionResult OnPostDelete(int accountID)
         {
-            UserCollectionRepo repo = new UserCollectionRepo(_connectionString);
-            repo.DeleteUser(accountID);
+            
+            _userService.DeleteUser(accountID);
 
             Message = "User deleted";
             LoadData();
@@ -131,8 +132,8 @@ namespace Zealand_Booking_System.Pages.Accounts
         /// </summary>
         private void LoadData()
         {
-            UserCollectionRepo userRepo = new UserCollectionRepo(_connectionString);
-            Users = userRepo.GetAllUsers();
+            
+            Users = _userService.GetAllUsers();
         }
     }
 }

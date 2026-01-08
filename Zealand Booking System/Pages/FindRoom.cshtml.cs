@@ -20,11 +20,7 @@ namespace Zealand_Booking_System.Pages
     /// </summary>
     public class FindRoomsModel : PageModel
     {
-        /// <summary>
-        /// Database connection string.
-        /// </summary>
-        private readonly string _connectionString =
-            "Server=(localdb)\\MSSQLLocalDB;Database=RoomBooking;Trusted_Connection=True;TrustServerCertificate=True";
+     
 
         /// <summary>
         /// Handles booking logic and room availability.
@@ -39,12 +35,9 @@ namespace Zealand_Booking_System.Pages
         /// <summary>
         /// Sets up repositories and the booking service.
         /// </summary>
-        public FindRoomsModel()
+        public FindRoomsModel(BookingService bookingService)
         {
-            BookingCollectionRepo bookingRepo = new BookingCollectionRepo(_connectionString);
-            RoomCollectionRepo roomRepo = new RoomCollectionRepo(_connectionString);
-
-            _bookingService = new BookingService(bookingRepo, roomRepo);
+            _bookingService = bookingService;
         }
 
         /// <summary>
