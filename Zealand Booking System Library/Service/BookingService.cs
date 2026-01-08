@@ -181,66 +181,29 @@ namespace Zealand_Booking_System_Library.Service
         /// </summary>
         public void Update(Booking booking, string role)
         {
-            // Kun Teacher skal have 3 dages varsel.
             if (role == "Teacher")
-            {
                 EnsureThreeDaysNotice(booking);
-            }
 
-            // 1) Find the room for this booking.
-            Room room = _roomRepo.GetRoomById(booking.RoomID);
-            if (room == null)
-            {
-                throw new Exception("The room cannot be found.");
-            }
+            var room = _roomRepo.GetRoomById(booking.RoomID)
+                ?? throw new Exception("The room cannot be found.");
 
-            // 2) Determine max bookings based on room type.
-            int maxBookingsForRoom;
-            if (room.RoomType == RoomType.ClassRoom)
-            {
-                maxBookingsForRoom = 2;
-            }
-            else
-            {
-                maxBookingsForRoom = 1;
-            }
+            int maxBookingsForRoom =
+                room.RoomType == RoomType.ClassRoom ? 2 : 1;
 
-            // 3) Load all bookings.
-            List<Booking> allBookings = _bookingRepo.GetAll();
-            int sameRoomSameSlotCount = 0;
+            int sameRoomSameSlotCount = _bookingRepo.GetAll()
+                .Where(b => b.BookingID != booking.BookingID)
+                .Count(b =>
+                    b.RoomID == booking.RoomID &&
+                    b.BookingDate.Date == booking.BookingDate.Date &&
+                    b.TimeSlot == booking.TimeSlot);
 
-            foreach (Booking existing in allBookings)
-            {
-                // Ignore the booking we are currently editing.
-                if (existing.BookingID == booking.BookingID)
-                {
-                    continue;
-                }
-
-                bool sameDay = existing.BookingDate.Date == booking.BookingDate.Date;
-                bool sameSlot = existing.TimeSlot == booking.TimeSlot;
-                bool sameRoom = existing.RoomID == booking.RoomID;
-
-                if (sameRoom && sameDay && sameSlot)
-                {
-                    sameRoomSameSlotCount++;
-                }
-            }
-
-            // 4) Check if max bookings for the room are reached.
             if (sameRoomSameSlotCount >= maxBookingsForRoom)
-            {
-                if (room.RoomType == RoomType.ClassRoom)
-                {
-                    throw new Exception("This classroom is already booked in this timezone.");
-                }
-                else
-                {
-                    throw new Exception("This meeting room is already booked in this timezone.");
-                }
-            }
+                throw new Exception(
+                    room.RoomType == RoomType.ClassRoom
+                        ? "This classroom is already booked in this timezone."
+                        : "This meeting room is already booked in this timezone."
+                );
 
-            // 5) If all rules are satisfied, update the booking.
             _bookingRepo.Update(booking);
         }
 
@@ -259,87 +222,36 @@ namespace Zealand_Booking_System_Library.Service
         /// </summary>
         public List<RoomAvailability> GetRoomAvailability(DateTime date, TimeSlot timeSlot, RoomType? roomType, bool? selectedSmartBoard)
         {
-            List<Room> allRooms = _roomRepo.GetAllRooms();
-            List<Booking> allBookings = _bookingRepo.GetAll();
+            var bookings = _bookingRepo.GetAll();
 
-            List<RoomAvailability> result = new List<RoomAvailability>();
-
-            for (int i = 0; i < allRooms.Count; i++)
-            {
-                Room room = allRooms[i];
-
-                // Filter by room type if a specific type is requested.
-                if (roomType.HasValue && room.RoomType != roomType.Value)
+            return _roomRepo.GetAllRooms()
+                .Where(r =>
+                    (!roomType.HasValue || r.RoomType == roomType.Value) &&
+                    (!selectedSmartBoard.HasValue || r.HasSmartBoard == selectedSmartBoard.Value))
+                .Select(room =>
                 {
-                    continue;
-                }
-                if (selectedSmartBoard.HasValue)
-                {
-                    if (room.HasSmartBoard != selectedSmartBoard.Value)
+                    int maxBookings = room.RoomType == RoomType.ClassRoom ? 2 : 1;
+
+                    int currentBookings = bookings.Count(b =>
+                        b.RoomID == room.RoomID &&
+                        b.BookingDate.Date == date.Date &&
+                        b.TimeSlot == timeSlot);
+
+                    return new RoomAvailability
                     {
-                        continue;
-                    }
-                }
-                int maxBookingsForRoom;
-
-                if (room.RoomType == RoomType.ClassRoom)
-                {
-                    maxBookingsForRoom = 2;
-                }
-                else if (room.RoomType == RoomType.MeetingRoom)
-                {
-                    maxBookingsForRoom = 1;
-                }
-                else
-                {
-                    maxBookingsForRoom = 1;
-                }
-
-                int currentBookings = 0;
-
-                // Count all bookings for this room on the selected date and time slot.
-                for (int j = 0; j < allBookings.Count; j++)
-                {
-                    Booking booking = allBookings[j];
-
-                    bool sameRoom = booking.RoomID == room.RoomID;
-                    bool sameDate = booking.BookingDate.Date == date.Date;
-                    bool sameSlot = booking.TimeSlot == timeSlot;
-
-                    if (sameRoom && sameDate && sameSlot)
-                    {
-                        currentBookings = currentBookings + 1;
-                    }
-                }
-
-                RoomAvailability availability = new RoomAvailability();
-                availability.Room = room;
-                availability.MaxBookings = maxBookingsForRoom;
-                availability.CurrentBookings = currentBookings;
-
-                // Set color and text based on how full the room is.
-                if (currentBookings == 0)
-                {
-                    availability.StatusColor = "green";
-                    availability.StatusText = "Helt ledig";
-                }
-                else if (currentBookings < maxBookingsForRoom)
-                {
-                    availability.StatusColor = "yellow";
-                    availability.StatusText = "Delvist booket";
-                }
-                else
-                {
-                    availability.StatusColor = "red";
-                    availability.StatusText = "Fuldt booket";
-                }
-
-                result.Add(availability);
-            }
-
-            return result;
+                        Room = room,
+                        MaxBookings = maxBookings,
+                        CurrentBookings = currentBookings,
+                        StatusColor = currentBookings == 0
+                            ? "green"
+                            : currentBookings < maxBookings ? "yellow" : "red",
+                        StatusText = currentBookings == 0
+                            ? "Helt ledig"
+                            : currentBookings < maxBookings ? "Delvist booket" : "Fuldt booket"
+                    };
+                })
+                .ToList();
         }
-
         /// <summary>
         /// Ensures that there are at least 3 days until the booking date.
         /// Why:
