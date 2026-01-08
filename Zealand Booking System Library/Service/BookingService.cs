@@ -63,11 +63,9 @@ namespace Zealand_Booking_System_Library.Service
         /// </summary>
         public void Add(Booking booking)
         {
-            // 1) Find the room to determine room type
             Room room = _roomRepo.GetRoomById(booking.RoomID);
             if (room == null)
             {
-                // Message is in Danish because it is shown to end users in the UI.
                 throw new Exception("The room does not exist.");
             }
 
@@ -75,59 +73,56 @@ namespace Zealand_Booking_System_Library.Service
 
             if (room.RoomType == RoomType.ClassRoom)
             {
-                // ClassRoom can be shared by two users.
                 maxBookingsForRoom = 2;
             }
             else if (room.RoomType == RoomType.MeetingRoom)
             {
-                // MeetingRoom can only have one booking at a time.
                 maxBookingsForRoom = 1;
             }
             else
             {
-                // Fallback rule if new room types are introduced.
                 maxBookingsForRoom = 1;
             }
 
-            List<Booking> allbookings = _bookingRepo.GetAll();
+            List<Booking> allBookings = _bookingRepo.GetAll();
 
-            int userBookingCount = allbookings.Count(b => b.AccountID == booking.AccountID);
-
-            if (allbookings.Any(b =>
+            // Same user, same day, same slot -> not allowed
+            Booking conflictBooking = allBookings.FirstOrDefault(b =>
                 b.AccountID == booking.AccountID &&
-                b.BookingDate.Date == booking.BookingDate.Date &&
-                b.TimeSlot == booking.TimeSlot))
-
-            {
-                throw new Exception("You already have a booking in this timezone.");
-            }
-            int sameRoomSameSlotCount = allbookings.Count(b =>
-                b.RoomID == room.RoomID &&
                 b.BookingDate.Date == booking.BookingDate.Date &&
                 b.TimeSlot == booking.TimeSlot);
 
-            // Rule: max 5 bookings per user.
+            if (conflictBooking != null)
+            {
+                throw new Exception("You already have a booking in this time zone.");
+            }
+
+            // Max 5 bookings per user (any date)
+            int userBookingCount = allBookings.Count(b => b.AccountID == booking.AccountID);
             if (userBookingCount >= 5)
             {
                 throw new Exception("You already have 5 bookings. Delete a booking before you make a new one.");
             }
 
-            // Check room capacity rule based on room type.
+            // Count bookings for same room + same day + same slot
+            int sameRoomSameSlotCount = allBookings.Count(b =>
+                b.RoomID == booking.RoomID &&
+                b.BookingDate.Date == booking.BookingDate.Date &&
+                b.TimeSlot == booking.TimeSlot);
+
             if (sameRoomSameSlotCount >= maxBookingsForRoom)
             {
                 if (room.RoomType == RoomType.ClassRoom)
                 {
                     throw new Exception("This classroom is already booked by 2 users timezone.");
                 }
-                else
-                {
-                    throw new Exception("This meeting room is already booked in this timezone.");
-                }
+
+                throw new Exception("This meeting room is already booked in this timezone.");
             }
 
-            // If all rules pass, save the booking.
             _bookingRepo.Add(booking);
         }
+
 
         /// <summary>
         /// Retrieves a single booking by ID.
