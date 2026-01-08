@@ -63,29 +63,14 @@ namespace Zealand_Booking_System_Library.Service
         /// </summary>
         public void Add(Booking booking)
         {
+            EnsureNotInPast(booking);
             Room room = _roomRepo.GetRoomById(booking.RoomID);
             if (room == null)
             {
                 throw new Exception("The room does not exist.");
             }
-
-            int maxBookingsForRoom;
-
-            if (room.RoomType == RoomType.ClassRoom)
-            {
-                maxBookingsForRoom = 2;
-            }
-            else if (room.RoomType == RoomType.MeetingRoom)
-            {
-                maxBookingsForRoom = 1;
-            }
-            else
-            {
-                maxBookingsForRoom = 1;
-            }
-
+            int maxBookingsForRoom = GetMaxBookingsForRoom(room);
             List<Booking> allBookings = _bookingRepo.GetAll();
-
             // Same user, same day, same slot -> not allowed
             Booking conflictBooking = allBookings.FirstOrDefault(b =>
                 b.AccountID == booking.AccountID &&
@@ -109,7 +94,7 @@ namespace Zealand_Booking_System_Library.Service
                 b.RoomID == booking.RoomID &&
                 b.BookingDate.Date == booking.BookingDate.Date &&
                 b.TimeSlot == booking.TimeSlot);
-
+           
             if (sameRoomSameSlotCount >= maxBookingsForRoom)
             {
                 if (room.RoomType == RoomType.ClassRoom)
@@ -166,6 +151,7 @@ namespace Zealand_Booking_System_Library.Service
         /// </summary>
         public List<Booking> GetAll()
         {
+            DeleteExpiredBookings();
             return _bookingRepo.GetAll();
         }
 
@@ -272,6 +258,51 @@ namespace Zealand_Booking_System_Library.Service
             if (daysUntilBooking < 3)
             {
                 throw new Exception("The Booking can  only be editet or deleted with 3 days warning.");
+            }
+        }
+        /// <summary>
+        /// Ensures that a booking is not made in the past.
+        /// Why:
+        /// - Prevents invalid or unrealistic bookings.
+        /// </summary>
+        private void EnsureNotInPast(Booking booking)
+        {
+            DateTime today = DateTime.Now.Date;
+
+            if (booking.BookingDate.Date < today)
+            {
+                throw new Exception("You cannot create a booking in the past.");
+            }
+        }
+        private int GetMaxBookingsForRoom(Room room)
+        {
+            int maxBookingsForRoom;
+
+            if (room.RoomType == RoomType.ClassRoom)
+            {
+                maxBookingsForRoom = 2;
+            }
+            else if (room.RoomType == RoomType.MeetingRoom)
+            {
+                maxBookingsForRoom = 1;
+            }
+            else
+            {
+                maxBookingsForRoom = 1;
+            }
+            return maxBookingsForRoom;
+        }
+        public void DeleteExpiredBookings()
+        {
+            DateTime today = DateTime.Now.Date;
+
+            var expiredBookings = _bookingRepo.GetAll()
+                .Where(b => b.BookingDate.Date < today)
+                .ToList();
+
+            foreach (var booking in expiredBookings)
+            {
+                _bookingRepo.Delete(booking.BookingID);
             }
         }
     }
