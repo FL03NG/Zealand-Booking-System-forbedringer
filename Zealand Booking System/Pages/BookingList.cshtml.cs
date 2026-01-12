@@ -150,6 +150,17 @@ namespace Zealand_Booking_System.Pages.Shared
 
             Bookings = filtered;
         }
+        /// <summary>
+        /// Sorts bookings by date (earliest first).
+        /// </summary>
+        public void OnPostSortByDate()
+        {
+            LoadData();
+
+            Bookings = Bookings
+                .OrderBy(b => b.BookingDate)
+                .ToList();
+        }
 
         /// <summary>
         /// Deletes a booking and creates a notification for the user.
