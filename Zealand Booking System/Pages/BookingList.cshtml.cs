@@ -237,7 +237,8 @@ namespace Zealand_Booking_System.Pages.Shared
         {
             Bookings = _bookingService.GetAll();
 
-            
+            Bookings.Sort();
+
             Rooms = _roomService.GetAllRooms();
 
             foreach (Booking booking in Bookings)

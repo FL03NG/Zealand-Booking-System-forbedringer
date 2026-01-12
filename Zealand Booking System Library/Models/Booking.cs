@@ -44,7 +44,7 @@ namespace Zealand_Booking_System_Library.Models
     /// - To allow the application to use the same booking representation in the UI,
     ///   database operations, and business logic.
     /// </summary>
-    public class Booking
+    public class Booking : IComparable<Booking>
     {
         /// <summary>
         /// Unique ID for the booking.
@@ -116,5 +116,10 @@ namespace Zealand_Booking_System_Library.Models
         /// - Entity Framework or manual mapping
         /// </summary>
         public Booking() { }
+        public int CompareTo(Booking other)
+        {
+            if (other == null) return 1;
+            return this.BookingDate.CompareTo(other.BookingDate);
+        }
     }
 }
