@@ -78,6 +78,13 @@
                 <option value="false">Without smartboard</option>
             </select>
         </div>
+        <div class="col-md-3">
+            <label class="form-label">Sort</label>
+            <select asp-for="SortOption" class="form-select">
+                <option value="Availability">Most available</option>
+                <option value="Filled">Most filled</option>
+            </select>
+        </div>
         <div class="col-md-3 d-flex align-items-end">
             @*
                 Submitting the form refreshes the list based on
