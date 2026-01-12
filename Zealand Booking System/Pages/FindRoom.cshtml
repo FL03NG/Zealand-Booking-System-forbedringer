@@ -79,10 +79,10 @@
             </select>
         </div>
         <div class="col-md-3">
-            <label class="form-label">Sort</label>
-            <select asp-for="SortOption" class="form-select">
-                <option value="Availability">Most available</option>
-                <option value="Filled">Most filled</option>
+            <label asp-for="RoomFilterOption" class="form-label">Rooms to show</label>
+            <select asp-for="RoomFilterOption" class="form-select">
+                <option value="All" selected="@(Model.RoomFilterOption == "All")">Show all rooms</option>
+                <option value="Available" selected="@(Model.RoomFilterOption == "Available")">Show available rooms</option>
             </select>
         </div>
         <div class="col-md-3 d-flex align-items-end">

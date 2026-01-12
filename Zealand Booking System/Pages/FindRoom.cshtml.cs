@@ -77,6 +77,8 @@ namespace Zealand_Booking_System.Pages
 
         [BindProperty]
         public string SortOption { get; set; } = "Availability";
+        [BindProperty]
+        public string RoomFilterOption { get; set; } = "All";
 
         /// <summary>
         /// Loads the page with default filter values.
@@ -155,21 +157,22 @@ namespace Zealand_Booking_System.Pages
                 SelectedSmartBoard
             );
 
+            if (RoomFilterOption == "Available")
+            {
+                Rooms = Rooms.Where(r => r.CurrentBookings < r.MaxBookings).ToList();
+            }
+
             if (SortOption == "Filled")
             {
-                // Red -> Yellow -> Green
                 Rooms = Rooms.OrderByDescending(r =>
                     r.CurrentBookings >= r.MaxBookings ? 2 :
-                    r.CurrentBookings > 0 ? 1 :
-                    0).ToList();
+                    r.CurrentBookings > 0 ? 1 : 0).ToList();
             }
             else
             {
-                // Green -> Yellow -> Red
                 Rooms = Rooms.OrderBy(r =>
                     r.CurrentBookings >= r.MaxBookings ? 2 :
-                    r.CurrentBookings > 0 ? 1 :
-                    0).ToList();
+                    r.CurrentBookings > 0 ? 1 : 0).ToList();
             }
         }
 
