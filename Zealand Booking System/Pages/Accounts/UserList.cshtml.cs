@@ -52,6 +52,8 @@ namespace Zealand_Booking_System.Pages.Accounts
         /// </summary>
         public string Message { get; private set; }
 
+        [BindProperty(SupportsGet = true)]
+        public string SelectedRole { get; set; }
         /// <summary>
         /// Loads the page and shows all users.
         /// </summary>
@@ -134,6 +136,12 @@ namespace Zealand_Booking_System.Pages.Accounts
         {
             
             Users = _userService.GetAllUsers();
+            if (!string.IsNullOrWhiteSpace(SelectedRole))
+            {
+                Users = Users
+                    .Where(u => u.Role == SelectedRole)
+                    .ToList();
+            }
         }
     }
 }
