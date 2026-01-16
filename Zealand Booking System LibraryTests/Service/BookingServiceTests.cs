@@ -119,10 +119,15 @@ namespace Zealand_Booking_System_Library.Service.Tests
 
             // Act + Assert
             // An exception is expected because the business rule forbids double bookings
-            var ex = Assert.ThrowsException<Exception>(() => service.Add(newBooking));
-
-            // The message confirms that the correct validation rule triggered the error
-            Assert.AreEqual("You already have a booking in this time zone.", ex.Message);
+            try
+            {
+                service.Add(newBooking);
+                Assert.Fail("Expected an exception, but none was thrown.");
+            }
+            catch (Exception ex)
+            {
+                Assert.AreEqual("You already have a booking in this time zone.", ex.Message);
+            }
 
             // Ensures that invalid bookings are never persisted
             bookingRepoMock.Verify(b => b.Add(It.IsAny<Booking>()), Times.Never);
